@@ -14,6 +14,7 @@ void directionMotor(String inputString, char& motor, int &distance){
   inputString.trim();
   motor = inputString.charAt(0);
   distsance = inputString.substring(1).toInt();
+  // takes all characters from index 1 onwards
 }
 
 void controlMotors(char motor, int distance) {
