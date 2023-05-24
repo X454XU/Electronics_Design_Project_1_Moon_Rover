@@ -78,7 +78,7 @@ void setup() {
 
 void loop() {
   if(Serial.available() > 0){
-    String input = SErial.realStringUntil('\n');
+    String input = Serial.realStringUntil('\n');
     char motorSelection; 
     // L for left motor (only turns right)
     // R for right motor (only turns left)
