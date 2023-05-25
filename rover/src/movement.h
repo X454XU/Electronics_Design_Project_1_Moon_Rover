@@ -64,7 +64,7 @@ void controlMotors(char motor, int distance) {
   digitalWrite(motor2IN2, LOW);
 }
 
-void setup() {
+motorsetup() {
   // Set the motor control pins as outputs
   pinMode(motor1IN1, OUTPUT);
   pinMode(motor1IN2, OUTPUT);
@@ -75,9 +75,7 @@ void setup() {
 
   // Initialize the serial communication for debugging
   Serial.begin(9600);
-}
-
-void loop() {
+  
   if(Serial.available() > 0){
     String input = Serial.realStringUntil('\n');
     char motorSelection; 
