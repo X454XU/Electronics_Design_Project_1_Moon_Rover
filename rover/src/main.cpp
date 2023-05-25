@@ -72,6 +72,8 @@ void setup() {
   Serial.println("\nStarting connection to server...");
   // If you get a connection, report back via serial:
   Udp.begin(localPort);
+  
+  motorsetup();
 }
 
 void loop() {
