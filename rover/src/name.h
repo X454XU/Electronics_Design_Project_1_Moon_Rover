@@ -72,7 +72,51 @@ string decodeName(){
 
     // Convert recorded signal into frequency domain
 
-    // Decode recorded signal    
+    // Decode recorded signal   
+  
+  std::string decodedcharacter; 
+    bool isStartBitDetected = false;
+    std::string binaryValue;
 
-    return name;
+    while (true) {
+        uint16_t analogValue = TC3_Handler(); //I'm assuming this is the analog value from the RADIO RECIEVER PIN
+
+        // Detect start bit (0)
+        if (isStartBitDetected == false) {
+            if (analogValue == 0) {
+                isStartBitDetected = true;
+                binaryValue.clear(); //erases any bits that have been added before and will start adding bits until 10 bits are present
+            }
+            continue;
+        }
+
+        // Collect 10-bit binary/ASCII value
+        binaryValue += std::to_string(analogValue);
+
+        // Check if full 10 bits have been received
+        if (binaryValue.length() >= 10) {
+            // Remove start bit (first bit) and stop bit (last bit)
+            binaryValue = binaryValue.substr(1, 10 - 2);
+            
+            // Convert binary/ASCII value to alphabet character
+            int decimalValue = std::stoi(binaryValue, nullptr, 2);
+            if (decimalValue >= 2 && decimalValue <= 27) {
+                char alphabetChar = alphabetLookupTable[decimalValue - 2];
+                decodedcharacter += alphabetChar;
+            }
+            
+            // Reset for the next binary value
+            isStartBitDetected = false;
+        }
+
+        // Detect stop bit (1)
+        if (analogValue == 1 && !isStartBitDetected) {
+            break;  // End of signal
+        }
+    }
+    Serial.printIn(decodedcharacter);
+    return decodedcharacter;  
+  
+
+    //return name;
 }
