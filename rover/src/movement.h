@@ -10,14 +10,10 @@ const int motor2PWM = 9;
 // first character of string: chooses which motors to use
 // second-fourth characters of string: distance travelled (correlates to number of turns)
 
-void directionMotor(String inputString, char& motor, int &distance){
-  inputString.trim();
-  motor = inputString.charAt(0);
-  distance = inputString.substring(1).toInt();
-  // takes all characters from index 1 onwards
-}
+void controlMotors(char direction, char[3] motorBuffer) {
+  // TODO: convert motorBuffer to int distance
+  uint8_t distance;
 
-void controlMotors(char motor, int distance) {
   // Control left motor
   if (motor == 'L') {
     motor1Speed = distance;
