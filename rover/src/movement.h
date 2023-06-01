@@ -13,12 +13,14 @@ const int motor2PWM = 9;
 void controlMotors(char direction, char[3] motorBuffer) {
   // TODO: convert motorBuffer to int distance
   uint8_t distance;
+  distance = motorBuffer[0]*100 + motorBuffer[1]*10 + motorBuffer[2];
+
+  int motor1Speed, motor2Speed; 
 
   // Control left motor
   if (motor == 'L') {
     motor1Speed = distance;
     motor2Speed = 0;
-    turning = 0;
     Serial.print("Moving left motor by ");
     Serial.println(distance);
   }
@@ -26,7 +28,6 @@ void controlMotors(char direction, char[3] motorBuffer) {
   else if (motor == 'R') {
     motor1Speed = 0;
     motor2Speed = distance;
-    turning = 0;
     Serial.print("Moving right motor by ");
     Serial.println(distance);
   }
