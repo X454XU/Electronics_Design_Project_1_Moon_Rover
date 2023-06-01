@@ -5,6 +5,11 @@
 
 #define RADIO_RECEIVER_PIN A0
 
+const std::vector<char> alphabetLookupTable = {
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+};
+
 void setTimerFrequency(uint32_t sampling_frequency) {
   uint16_t compareValue = (CPU_HZ / (TIMER_PRESCALER_DIV * sampling_frequency)) - 1;
   TcCount16* TC = (TcCount16*) TC3;
