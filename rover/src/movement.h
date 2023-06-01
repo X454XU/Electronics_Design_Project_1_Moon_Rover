@@ -13,7 +13,7 @@ const int motor2PWM = 9;
 void directionMotor(String inputString, char& motor, int &distance){
   inputString.trim();
   motor = inputString.charAt(0);
-  distsance = inputString.substring(1).toInt();
+  distance = inputString.substring(1).toInt();
   // takes all characters from index 1 onwards
 }
 
