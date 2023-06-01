@@ -13,26 +13,33 @@ const int motor2PWM = 9;
 void controlMotors(char direction, char[3] motorBuffer) {
   // TODO: convert motorBuffer to int distance
   uint8_t distance;
-  distance = motorBuffer[0]*100 + motorBuffer[1]*10 + motorBuffer[2];
+  
+  int firstdigit = (int)motorBuffer[0]; 
+  int seconddigit = (int)motorBuffer[1];
+  int thirddigit = (int)motorBuffer[2];
 
-  int motor1Speed, motor2Speed; 
+  distance = firstdigit*100 + seconddigit*10 + thirddigit;
+
+  int motor1Speed, motor2Speed, turning;
 
   // Control left motor
-  if (motor == 'L') {
+  if (direction == 'L') {
     motor1Speed = distance;
     motor2Speed = 0;
+    turning = 0;
     Serial.print("Moving left motor by ");
     Serial.println(distance);
   }
   // Control right motor
-  else if (motor == 'R') {
+  else if (direction == 'R') {
     motor1Speed = 0;
     motor2Speed = distance;
+    turning = 0;
     Serial.print("Moving right motor by ");
     Serial.println(distance);
   }
   // Control both motors
-  else if (motor == 'B') {
+  else if (direction == 'B') {
     motor1Speed = distance;
     motor2Speed = distance;
     Serial.print("Moving both motors by ");
@@ -46,22 +53,26 @@ void controlMotors(char direction, char[3] motorBuffer) {
     Serial.println("Invalid motor selection");
   }
 
-  motorSpeed1 += turning;
-  motorSpeed 2 += turning;
+  motor1Speed += turning;
+  motor2Speed += turning;
 
-  motorSpeed1 = constrain(motorSpeed1, 0, 255); 
-  motorSpeed2 = constrain(motorSpeed2, 0, 255);
+  motor1Speed = constrain(motor1Speed, 0, 255); 
+  motor2Speed = constrain(motor2Speed, 0, 255);
 
-  analogWrite(motor1PWM, motorSpeed1);
+  analogWrite(motor1PWM, motor1Speed);
   digitalWrite(motor1IN1, HIGH);
   digitalWrite(motor1IN2, LOW);
 
-  analogWrite(motor2PWM, motorSpeed2);
+  analogWrite(motor2PWM, motor2Speed);
   digitalWrite(motor2IN1, HIGH);
   digitalWrite(motor2IN2, LOW);
+
+  // Initialize the serial communication for debugging
+  Serial.begin(9600);
+  delay(100);
 }
 
-motorsetup() {
+void motorsetup() {
   // Set the motor control pins as outputs
   pinMode(motor1IN1, OUTPUT);
   pinMode(motor1IN2, OUTPUT);
@@ -69,21 +80,4 @@ motorsetup() {
   pinMode(motor2IN1, OUTPUT);
   pinMode(motor2IN2, OUTPUT);
   pinMode(motor2PWM, OUTPUT);
-
-  // Initialize the serial communication for debugging
-  Serial.begin(9600);
-  
-  if(Serial.available() > 0){
-    String input = Serial.realStringUntil('\n');
-    char motorSelection; 
-    // L for left motor (only turns right)
-    // R for right motor (only turns left)
-    // B for both (straight)
-    int distance; 
-    // 3 digit string (e.g. 100) 
-    parseInputString(input, motorSelection, distance);
-    controlMotors(motorSelection, distance);
-  }
-
-  delay(100);
 }
