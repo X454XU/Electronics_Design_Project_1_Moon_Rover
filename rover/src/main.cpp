@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include <WiFi101.h>
 #include <WiFiUdp.h>
+#include <stdint.h>
 
 #include "age.h"
 #include "movement.h"
