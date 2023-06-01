@@ -4,7 +4,7 @@
 #include <WiFiUdp.h>
 
 #include "age.h"
-//#include "movement.h"
+#include "movement.h"
 //#include "name.h"
 //#include "polarity.h"
 #include "secrets.h"
@@ -19,6 +19,7 @@ unsigned int localPort = 2390; // local port to listen on
 
 char packetBuffer[255]; // buffer to hold incoming packet
 char ReplyBuffer[12]; // a string to send back
+char motorBuffer[3]; // buffer to hold motor distance
 
 String reply = "acknowledged";
 uint16_t age;
@@ -116,6 +117,10 @@ void loop() {
       // Move rover:
       case 'D':
         reply.toCharArray(ReplyBuffer, 12);
+        motorBuffer[0] = packetBuffer[2];
+        motorBuffer[1] = packetBuffer[3];
+        motorBuffer[2] = packetBuffer[4];
+        controlMotors(packetBuffer[1], motorBuffer);
         break;
     }
 
