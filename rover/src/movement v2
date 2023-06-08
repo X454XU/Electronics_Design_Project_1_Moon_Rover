@@ -1,11 +1,5 @@
-// requires Arduino libaries 
-
-const int motor1IN1 = 4;
-const int motor1IN2 = 5;
-const int motor1PWM = 6;
-const int motor2IN1 = 7;
-const int motor2IN2 = 8;
-const int motor2PWM = 9;
+const int motor1PWM = 9;
+const int motor2PWM = 10;
 
 void controlMotors(char[6] motorBuffer){
     int x1 = (int)motorBuffer[0]; 
@@ -32,21 +26,13 @@ void controlMotors(char[6] motorBuffer){
     motor1Speed = constrain(motor1Speed, -255, 255);
     motor2Speed = constrain(motor2Speed, -255, 255);
 
-    // Control motor directions based on joystick values
-    if (y >= 512) {
-    // Forward
-        digitalWrite(motor1IN1, HIGH);
-        digitalWrite(motor1IN2, LOW);
-        digitalWrite(motor2IN1, HIGH);
-        digitalWrite(motor2IN2, LOW);
-    } else if (y < 512) {
-    // Reverse
-        digitalWrite(motor1IN1, LOW);
-        digitalWrite(motor1IN2, HIGH);
-        digitalWrite(motor2IN1, LOW);
-        digitalWrite(motor2IN2, HIGH);
-    }
     // Set the motor speeds
-    analogWrite(motor1PWM, abs(motor1Speed));
-    analogWrite(motor2PWM, abs(motor2Speed));
+    analogWrite(motor1PWM, motor1Speed);
+    analogWrite(motor2PWM, motor2Speed);
+}
+
+void motorsetup() {
+  // Set the motor control pins as outputs
+  pinMode(motor1PWM, OUTPUT);
+  pinMode(motor2PWM, OUTPUT);
 }
