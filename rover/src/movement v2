@@ -25,10 +25,20 @@ void controlMotors(char[6] motorBuffer){
 
     motor1Speed = constrain(motor1Speed, -255, 255);
     motor2Speed = constrain(motor2Speed, -255, 255);
+    
+    if (ypos >= 0) {
+    // Forward
+      digitalWrite(motor1PWM, HIGH); // Set motor 1 direction
+      digitalWrite(motor2PWM, HIGH); // Set motor 2 direction
+    } else {
+    // Reverse
+      digitalWrite(motor1PWM, LOW); // Set motor 1 direction
+      digitalWrite(motor2PWM, LOW); // Set motor 2 direction
+    }
 
     // Set the motor speeds
-    analogWrite(motor1PWM, motor1Speed);
-    analogWrite(motor2PWM, motor2Speed);
+    analogWrite(motor1PWM, abs(motor1Speed));
+    analogWrite(motor2PWM, abs(motor2Speed));
 }
 
 void motorsetup() {
