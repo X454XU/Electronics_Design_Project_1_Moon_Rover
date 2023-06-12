@@ -1,14 +1,12 @@
 // Contains functions required to decode alien's name
 
+#include <string>
+
 #define CPU_HZ 48000000
 #define TIMER_PRESCALER_DIV 1024
 
 #define RADIO_RECEIVER_PIN A0
 
-const std::vector<char> alphabetLookupTable = {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-};
 
 void setTimerFrequency(uint32_t sampling_frequency) {
   uint16_t compareValue = (CPU_HZ / (TIMER_PRESCALER_DIV * sampling_frequency)) - 1;
@@ -55,7 +53,7 @@ void startTimer(int frequencyHz) {
   while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
 }
 
-uint16_t TC3_Handler() {
+uint16_t Timercount_Handler() {
   TcCount16* TC = (TcCount16*) TC3;
   // If this interrupt is due to the compare register matching the timer count
   // we toggle the LED.
@@ -64,64 +62,68 @@ uint16_t TC3_Handler() {
     // Write callback here!!!
     return analogRead(RADIO_RECEIVER_PIN);
   }
+  return 0;
 }
 
-string decodeName(){
-    const uint32_t signal_frequency = 100000; // [Hz]
-    const uint32_t sampling_frequency = 200000; // [Hz]
+std::string decodeName() {
+  const uint32_t signal_frequency = 100000; // [Hz]
+  const uint32_t sampling_frequency = 200000; // [Hz]
 
-    // Sample incoming signal
-    pinMode(RADIO_RECEIVER_PIN, INPUT);
+  // Sample incoming signal
+  pinMode(RADIO_RECEIVER_PIN, INPUT);
 
-    startTimer(sampling_frequency);
+  startTimer(sampling_frequency);
 
-    // Convert recorded signal into frequency domain
+  std::string decodedName;
+  static std::string fullName;  // Variable to store the full name
+  bool isStartBitDetected = false;
+  std::string binaryValue;
 
-    // Decode recorded signal   
-  
-  std::string decodedcharacter; 
-    bool isStartBitDetected = false;
-    std::string binaryValue;
+  while (true) {
+    uint16_t analogValue = Timercount_Handler();
 
-    while (true) {
-        uint16_t analogValue = TC3_Handler(); //I'm assuming this is the analog value from the RADIO RECIEVER PIN
-
-        // Detect start bit (0)
-        if (isStartBitDetected == false) {
-            if (analogValue == 0) {
-                isStartBitDetected = true;
-                binaryValue.clear(); //erases any bits that have been added before and will start adding bits until 10 bits are present
-            }
-            continue;
-        }
-
-        // Collect 10-bit binary/ASCII value
-        binaryValue += std::to_string(analogValue);
-
-        // Check if full 10 bits have been received
-        if (binaryValue.length() >= 10) {
-            // Remove start bit (first bit) and stop bit (last bit)
-            binaryValue = binaryValue.substr(1, 10 - 2);
-            
-            // Convert binary/ASCII value to alphabet character
-            int decimalValue = std::stoi(binaryValue, nullptr, 2);
-            if (decimalValue >= 2 && decimalValue <= 27) {
-                char alphabetChar = alphabetLookupTable[decimalValue - 2];
-                decodedcharacter += alphabetChar;
-            }
-            
-            // Reset for the next binary value
-            isStartBitDetected = false;
-        }
-
-        // Detect stop bit (1)
-        if (analogValue == 1 && !isStartBitDetected) {
-            break;  // End of signal
-        }
+    // Detect start bit (0)
+    if (isStartBitDetected == false) {
+      if (analogValue == 0) {
+        isStartBitDetected = true;
+        binaryValue.clear();
+      }
+      continue;
     }
-    Serial.printIn(decodedcharacter);
-    return decodedcharacter;  
-  
 
-    //return name;
+    // Collect 10-bit binary/ASCII value
+    binaryValue += std::to_string(analogValue);
+
+    // Check if full 10 bits have been received
+    if (binaryValue.length() >= 10) {
+      // Remove start bit (first bit) and stop bit (last bit)
+      binaryValue = binaryValue.substr(1, 10 - 2);
+
+      // Convert binary/ASCII value to alphabet character
+      int decimalValue = std::stoi(binaryValue, nullptr, 2);
+      if (decimalValue >= 2 && decimalValue <= 27) {
+        char alphabetChar = 'A' + decimalValue - 2;
+        decodedName += alphabetChar;
+      }
+
+      // Reset for the next binary value
+      isStartBitDetected = false;
+    }
+
+    // Detect stop bit (1)
+    if (analogValue == 1 && !isStartBitDetected) {
+      // Check if the full name has been repeated twice
+      size_t repetitionPos = fullName.find(fullName.substr(0, fullName.length() / 2), fullName.length() / 2);
+      if (repetitionPos != std::string::npos) {
+        std::string correctedFullName = fullName.substr(0, repetitionPos);  // Get the correct full name
+        fullName = correctedFullName;  // Update the full name variable
+        return correctedFullName;  // Return the correct full name
+      } else {
+        fullName += decodedName;  // Accumulate the decoded name in the full name variable
+        decodedName.clear();  // Clear the decoded name for the next iteration
+        binaryValue.clear();  // Clear the binary value for the next iteration
+      }
+    }
+  }
 }
+
