@@ -35,9 +35,9 @@ void controlMotors(char motorBuffer[8]){
     int x2 = (int)motorBuffer[1] - 48;
     int x3 = (int)motorBuffer[2] - 48;
 
-    int y1 = (int)motorBuffer[4] - 48; 
-    int y2 = (int)motorBuffer[5] - 48;
-    int y3 = (int)motorBuffer[6] - 48;
+    int y1 = (int)motorBuffer[3] - 48; 
+    int y2 = (int)motorBuffer[4] - 48;
+    int y3 = (int)motorBuffer[5] - 48;
 
     int xpos = x1*100 + x2*10 + x3;
     Serial.println("xpos:");
