@@ -35,26 +35,35 @@ void controlMotors(char motorBuffer[6]){
       digitalWrite(motor1DIR, HIGH);
       digitalWrite(motor2DIR, HIGH); 
 
-      motor1Speed = map(motor1Speed, 500, 999, 130, 255);
-      motor2Speed = map(motor2Speed, 500, 999, 130, 255);
-      turning = map(turning, 500, 999, 130, 255);
+      motor1Speed -= 500;
+      motor2Speed -= 500;
+      turning -= 500;
+      // everything is in 0-499 range
 
-      motor1Speed = motor1Speed/3 + turning; 
-      motor2Speed = motor2Speed/3 + turning/2;
+      motor1Speed += 500 - turning/3;
+      motor2Speed += 500 - turning;
     }
     else if(xpos < 500 && ypos > 500){
       digitalWrite(motor1DIR, HIGH);
       digitalWrite(motor2DIR, HIGH); 
 
-      motor1Speed = motor1Speed/3 + (999-turning)/2; 
-      motor2Speed = motor2Speed/3 + turning; 
+      motor1Speed -= 500;
+      motor2Speed -= 500;
+      turning = 500 - turning; 
+
+      motor1Speed += 500 - turning;
+      motor2Speed += 500 - turning/3; 
     }
     else if(xpos > 500 && ypos < 500){
       digitalWrite(motor1DIR, LOW);
       digitalWrite(motor2DIR, LOW); 
 
-      motor1Speed = motor1Speed/3 + turning; 
-      motor2Speed = motor2Speed/3 + turning/2; 
+      motor1Speed = 500 - motor1Speed;
+      motor2Speed = 500 - motor2Speed; 
+      turning -= 500;
+
+      motor1Speed += 500 - turning/3;
+      motor2Speed += 500 - turning; 
     }
 
     else if(xpos < 500 && ypos < 500){
@@ -62,8 +71,12 @@ void controlMotors(char motorBuffer[6]){
       digitalWrite(motor1DIR, LOW);
       digitalWrite(motor2DIR, LOW); 
 
-      motor1Speed = motor1Speed/3 + turning; 
-      motor2Speed = motor2Speed/3 + turning/2; 
+      motor1Speed = 500 - motor1Speed;
+      motor2Speed = 500 - motor2Speed;
+      turning = 500 - turning;
+
+      motor1Speed += 500 - turning;
+      motor2Speed += 500 - turning/3; 
     }
     else{
       motor1Speed = 0;
@@ -71,13 +84,9 @@ void controlMotors(char motorBuffer[6]){
     }
 
     if(motor1Speed > 0 && motor2Speed > 0){
-      motor1Speed = map(motor1Speed, 0, 1332, 130, 255);
-      motor2Speed= map(motor2Speed, 0, 1332, 130, 255);
+      motor1Speed = map(motor1Speed, 0, 1000, 125, 255);
+      motor2Speed= map(motor2Speed, 0, 1000, 125, 255);
     }
-
-    // motor1Speed = map(motor1Speed, 0, 1498.5, 0, 255);
-    // motor2Speed = map(motor2Speed, 0, 1498.5, 0, 255);
-    // depends on joystick inputs
 
     motor1Speed = constrain(motor1Speed, 0, 255);
     motor2Speed = constrain(motor2Speed, 0, 255);
@@ -106,4 +115,3 @@ void motorSetup() {
   pinMode(motor1DIR, OUTPUT);
   pinMode(motor2DIR, OUTPUT);
 }
-
