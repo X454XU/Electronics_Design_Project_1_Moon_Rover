@@ -26,7 +26,7 @@ const int motor2EN = 6;
 const int motor1DIR = 9;
 const int motor2DIR = 10;
 
-void controlMotors(char motorBuffer[8]){
+void controlMotors(char motorBuffer[6]){
 
     digitalWrite(motor1EN, HIGH);
     digitalWrite(motor2EN, HIGH);
