@@ -65,8 +65,8 @@ uint16_t Timercount_Handler() {
   return 0;
 }
 
-std::string decodeName() {
-  const uint32_t signal_frequency = 100000; // [Hz]
+std:: string decodeName() {
+    const uint32_t signal_frequency = 100000; // [Hz]
   const uint32_t sampling_frequency = 200000; // [Hz]
 
   // Sample incoming signal
@@ -74,8 +74,9 @@ std::string decodeName() {
 
   startTimer(sampling_frequency);
 
-  std::string decodedName;
-  static std::string fullName;  // Variable to store the full name
+  std::string fullName;  // Variable to store the full name
+  std::string previousName;  // Variable to store the previous name
+
   bool isStartBitDetected = false;
   std::string binaryValue;
 
@@ -103,7 +104,7 @@ std::string decodeName() {
       int decimalValue = std::stoi(binaryValue, nullptr, 2);
       if (decimalValue >= 2 && decimalValue <= 27) {
         char alphabetChar = 'A' + decimalValue - 2;
-        decodedName += alphabetChar;
+        fullName += alphabetChar;
       }
 
       // Reset for the next binary value
@@ -112,18 +113,21 @@ std::string decodeName() {
 
     // Detect stop bit (1)
     if (analogValue == 1 && !isStartBitDetected) {
-      // Check if the full name has been repeated twice
-      size_t repetitionPos = fullName.find(fullName.substr(0, fullName.length() / 2), fullName.length() / 2);
-      if (repetitionPos != std::string::npos) {
-        std::string correctedFullName = fullName.substr(0, repetitionPos);  // Get the correct full name
-        fullName = correctedFullName;  // Update the full name variable
-        return correctedFullName;  // Return the correct full name
-      } else {
-        fullName += decodedName;  // Accumulate the decoded name in the full name variable
-        decodedName.clear();  // Clear the decoded name for the next iteration
-        binaryValue.clear();  // Clear the binary value for the next iteration
-      }
+      break; // End of signal
     }
+
+    // Check if the full name has been repeated
+    size_t repetitionPos = fullName.find(previousName, 0);
+    if (repetitionPos != std::string::npos && previousName != fullName) {
+      std::string correctedFullName = fullName;  // Get the correct full name
+      Serial.println(correctedFullName.c_str());  // Print the correct full name
+      previousName = fullName;  // Update the previous name
+    }
+
+    // Print the full name acquired so far
+    Serial.println(fullName.c_str());
   }
+
+  return fullName;
 }
 
