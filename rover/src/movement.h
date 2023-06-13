@@ -45,7 +45,7 @@ void controlMotors(char motorBuffer[6]){
       motor1Speed = motor1Speed/2 + turning/2; 
       motor2Speed = motor2Speed + turning/2; 
     }
-    else if(xpos > 500 && ypox < 500){
+    else if(xpos > 500 && ypos < 500){
       digitalWrite(motor1DIR, LOW);
       digitalWrite(motor2DIR, LOW); 
 
@@ -86,11 +86,11 @@ void controlMotors(char motorBuffer[6]){
 
 void motorsetup() {
   // Set the motor control pins as outputs
-   const int motor1EN = 5;
-   const int motor2EN = 6;
+  const int motor1EN = 5;
+  const int motor2EN = 6;
 
-   const int motor1DIR = 9;
-   const int motor2DIR = 10;
+  const int motor1DIR = 9;
+  const int motor2DIR = 10;
   pinMode(motor1EN, OUTPUT);
   pinMode(motor2EN, OUTPUT);
 
