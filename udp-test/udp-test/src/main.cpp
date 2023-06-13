@@ -4,10 +4,6 @@
 #include <WiFiUdp.h>
 #include <stdint.h>
 
-#include "age.h"
-#include "movement.h"
-//#include "name.h"
-//#include "polarity.h"
 #include "secrets.h"
 
 int status = WL_IDLE_STATUS;
@@ -26,7 +22,6 @@ String reply; // string to send back
 
 WiFiUDP Udp;
 
-/*
 void printWiFiStatus() {
   // Print the SSID of the network you're attached to:
   Serial.print("SSID: ");
@@ -43,39 +38,36 @@ void printWiFiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-*/
 
 void setup() {
-  /*
   // Initialize serial and wait for port to open:
   Serial.begin(9600);
   while (!Serial) {
     ; // Wait for serial port to connect. Needed for native USB port only.
   }
-  */
 
   // Check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
-    //Serial.println("WiFi 101 Shield not present");
+    Serial.println("WiFi 101 Shield not present");
     // Don't continue:
     while (true);
   }
 
   // Attempt to connect to WiFi network:
   while ( status != WL_CONNECTED) {
-    //Serial.print("Attempting to connect to SSID: ");
-    //Serial.println(ssid);
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.begin(ssid, pass);
 
     // Wait 10 seconds for connection:
     delay(10000);
   }
-  //Serial.println("Connected to WiFi");
-  //printWiFiStatus();
+  Serial.println("Connected to WiFi");
+  printWiFiStatus();
 
   Udp.begin(localPort);
-  //Serial.println("Now listening...");
+  Serial.println("Now listening...");
 }
 
 void loop() {
@@ -83,19 +75,19 @@ void loop() {
   int packetSize = Udp.parsePacket();
   if (packetSize)
   {
-    //Serial.print("Received packet of size ");
-    //Serial.println(packetSize);
-    //Serial.print("From ");
+    Serial.print("Received packet of size ");
+    Serial.println(packetSize);
+    Serial.print("From ");
     IPAddress remoteIp = Udp.remoteIP();
-    //Serial.print(remoteIp);
-    //Serial.print(", port ");
-    //Serial.println(Udp.remotePort());
+    Serial.print(remoteIp);
+    Serial.print(", port ");
+    Serial.println(Udp.remotePort());
 
     // Read the packet into packetBufffer:
     int len = Udp.read(packetBuffer, 8);
     if (len > 0) packetBuffer[len] = 0;
-    //Serial.print("Contents: ");
-    //Serial.println(packetBuffer);
+    Serial.print("Contents: ");
+    Serial.println(packetBuffer);
 
     switch(packetBuffer[0]){
       // Decode alien's name:
@@ -105,16 +97,17 @@ void loop() {
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
         Udp.endPacket();
-        //Serial.println("Sent name");
+        Serial.println("Sent name");
         break;
       
       // Read alien's age:
       case 'B':
-        itoa(readAge(), replyBuffer, 10);
+        reply = "AGE";
+        reply.toCharArray(replyBuffer, 16);
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
         Udp.endPacket();
-        //Serial.println("Sent age");
+        Serial.println("Sent age");
         break;
 
       // Measure polarity of alien's magnetic field:
@@ -124,7 +117,7 @@ void loop() {
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
         Udp.endPacket();
-        //Serial.println("Sent polarity");
+        Serial.println("Sent polarity");
         break;
 
       // Move rover:
@@ -135,8 +128,6 @@ void loop() {
         motorBuffer[3] = packetBuffer[4];
         motorBuffer[4] = packetBuffer[5];
         motorBuffer[5] = packetBuffer[6];
-
-        /*
         Serial.print("Moving rover with input: ");
         Serial.print(motorBuffer[0]);
         Serial.print(motorBuffer[1]);
@@ -144,7 +135,6 @@ void loop() {
         Serial.print(motorBuffer[3]);
         Serial.print(motorBuffer[4]);
         Serial.println(motorBuffer[5]);
-        */
         break;
     }
   }
