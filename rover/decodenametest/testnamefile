@@ -120,6 +120,7 @@ std::string decodeName() {
         std::string correctedFullName = fullName;  // Get the correct full name
         // Perform the necessary actions with the corrected full name
         // ...
+        Serial.printIn(correctedFullName);
         return correctedFullName;
       }
       // Clear the binary value for the next iteration
@@ -127,7 +128,7 @@ std::string decodeName() {
       continue; // Go back to the start of the while loop
     }
   }
-
+  
   return fullName;
 }
 
