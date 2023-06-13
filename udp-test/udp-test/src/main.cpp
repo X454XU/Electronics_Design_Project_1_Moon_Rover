@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "secrets.h"
+#include "movement.h"
 
 int status = WL_IDLE_STATUS;
 
@@ -65,6 +66,8 @@ void setup() {
   }
   Serial.println("Connected to WiFi");
   printWiFiStatus();
+
+  motorSetup();
 
   Udp.begin(localPort);
   Serial.println("Now listening...");
@@ -128,6 +131,7 @@ void loop() {
         motorBuffer[3] = packetBuffer[4];
         motorBuffer[4] = packetBuffer[5];
         motorBuffer[5] = packetBuffer[6];
+        controlMotors(motorBuffer);
         Serial.print("Moving rover with input: ");
         Serial.print(motorBuffer[0]);
         Serial.print(motorBuffer[1]);

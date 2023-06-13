@@ -1,4 +1,4 @@
 // Contains WiFi credentials
 
-#define SECRET_SSID "MI6 Surveillance Van"
-#define SECRET_PASS "4t5HtfGcmMuM!D"
+#define SECRET_SSID "EEERover"
+#define SECRET_PASS "exhibition"
