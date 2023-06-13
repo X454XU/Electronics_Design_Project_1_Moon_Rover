@@ -1,32 +1,9 @@
-#include <SPI.h>
-// #include "movement.h"
-
-void setup() {
-  // Initialize serial and wait for port to open:
-  Serial.begin(9600);
-  while (!Serial) {
-    ; // Wait for serial port to connect. Needed for native USB port only.
-  }
-  Serial.println("setup");
-  motorsetup();
-
-  // You can put additional commands in here
-  char motorBuffer[6] = {'0','5','0','2','0','0'}; // Write input here
-  Serial.println("starting...");
-  controlMotors(motorBuffer);
-}
-
-void loop() {
-
-}
-
-const int motor1EN = 5;
-const int motor2EN = 6;
-
-const int motor1DIR = 9;
-const int motor2DIR = 10;
-
 void controlMotors(char motorBuffer[6]){
+    const int motor1EN = 5;
+    const int motor2EN = 6;
+
+    const int motor1DIR = 9;
+    const int motor2DIR = 10;
 
     digitalWrite(motor1EN, HIGH);
     digitalWrite(motor2EN, HIGH);
@@ -109,7 +86,11 @@ void controlMotors(char motorBuffer[6]){
 
 void motorsetup() {
   // Set the motor control pins as outputs
+   const int motor1EN = 5;
+   const int motor2EN = 6;
 
+   const int motor1DIR = 9;
+   const int motor2DIR = 10;
   pinMode(motor1EN, OUTPUT);
   pinMode(motor2EN, OUTPUT);
 
