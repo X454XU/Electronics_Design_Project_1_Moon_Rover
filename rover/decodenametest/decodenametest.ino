@@ -1,5 +1,4 @@
 // Contains functions required to decode alien's name
-//#include <StandardCplusplus.h>
 #include <string>
 
 #define CPU_HZ 48000000
@@ -66,8 +65,8 @@ uint16_t Timercount_Handler() {
 }
 
 
-std:: string decodeName() {
-    const uint32_t signal_frequency = 100000; // [Hz]
+std::string decodeName() {
+  const uint32_t signal_frequency = 100000; // [Hz]
   const uint32_t sampling_frequency = 200000; // [Hz]
 
   // Sample incoming signal
@@ -84,10 +83,8 @@ std:: string decodeName() {
   while (true) {
     uint16_t analogValue = Timercount_Handler();
 
-
-
     // Detect start bit (0)
-    if (isStartBitDetected == false) {
+    if (!isStartBitDetected) {
       if (analogValue == 0) {
         isStartBitDetected = true;
         binaryValue.clear();
@@ -116,32 +113,21 @@ std:: string decodeName() {
 
     // Detect stop bit (1)
     if (analogValue == 1 && !isStartBitDetected) {
-      break; // End of signal
+      // Check if the full name has been repeated
+      size_t repetitionPos = fullName.find(previousName, 0);
+      if (repetitionPos != std::string::npos && previousName != fullName) {
+        std::string correctedFullName = fullName;  // Get the correct full name
+        // Perform the necessary actions with the corrected full name
+        // ...
+        return correctedFullName;
+      }
+      // Clear the binary value for the next iteration
+      binaryValue.clear();
+      continue; // Go back to the start of the while loop
     }
-
-    // Check if the full name has been repeated
-    size_t repetitionPos = fullName.find(previousName, 0);
-    if (repetitionPos != std::string::npos && previousName != fullName) {
-      std::string correctedFullName = fullName;  // Get the correct full name
-      Serial.println(correctedFullName.c_str());  // Print the correct full name
-      previousName = fullName;  // Update the previous name
-    }
-
-    // Print the full name acquired so far
-    Serial.println(fullName.c_str());
   }
 
   return fullName;
-}
-
-void setup(){
-  Serial.begin(9600);
-  //delay(2000);
-}
-
-void loop() {
-  decodeName();
-  
 }
 
 
