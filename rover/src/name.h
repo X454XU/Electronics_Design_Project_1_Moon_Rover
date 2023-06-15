@@ -113,19 +113,18 @@ std:: string decodeName() {
 
     // Detect stop bit (1)
     if (analogValue == 1 && !isStartBitDetected) {
-      break; // End of signal
+      // Check if the full name has been repeated
+      size_t repetitionPos = fullName.find(previousName, 0);
+      if (repetitionPos != std::string::npos && previousName != fullName) {
+        std::string correctedFullName = fullName;  // Get the correct full name
+        // Perform the necessary actions with the corrected full name
+        // ...
+        return correctedFullName;
+      }
+      // Clear the binary value for the next iteration
+      binaryValue.clear();
+      continue; // Go back to the start of the while loop
     }
-
-    // Check if the full name has been repeated
-    size_t repetitionPos = fullName.find(previousName, 0);
-    if (repetitionPos != std::string::npos && previousName != fullName) {
-      std::string correctedFullName = fullName;  // Get the correct full name
-      Serial.println(correctedFullName.c_str());  // Print the correct full name
-      previousName = fullName;  // Update the previous name
-    }
-
-    // Print the full name acquired so far
-    Serial.println(fullName.c_str());
   }
 
   return fullName;
