@@ -130,4 +130,3 @@ std:: string decodeName() {
 
   return fullName;
 }
-

@@ -1,6 +1,6 @@
-// Contains functions required to read alien's age
-
 #define IR_RECEIVER_PIN A1
+
+// Contains functions required to read alien's age
 
 uint32_t detectPulse(uint16_t avg_voltage){
     uint32_t time;

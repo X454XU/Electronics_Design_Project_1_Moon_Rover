@@ -16,12 +16,12 @@ class Direction(Enum):
 class Joystick(QWidget):
     def __init__(self, parent=None):
         super(Joystick, self).__init__(parent)
-        self.setMinimumSize(100, 100)
+        self.setMinimumSize(200, 200) # Updated from 100, 100
         self.movingOffset = QPointF(0, 0)
         self.grabCenter = False
-        self.__maxDistance = 50
+        self.__maxDistance = 100 # updated from 50
         self.sock = None
-        self.setStyleSheet("background-color: #5A5A5A;")
+        self.setStyleSheet("background-color: #242424;")
 
     def setSocket(self, sock, UDP_IP, UDP_PORT):
         self.sock = sock
@@ -104,6 +104,11 @@ class Joystick(QWidget):
         self.movingOffset = QPointF(0, 0)
         self.update()
 
+        # Send a final packet with coordinates 500,500 when the joystick is released
+        if self.sock is not None:
+            message = "D500500"
+            self.sock.sendto(bytes(message, "utf-8"), (self.UDP_IP, self.UDP_PORT))
+
     def mouseMoveEvent(self, event):
         if self.sock is None:
             return
@@ -114,7 +119,7 @@ class Joystick(QWidget):
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #808080;")
+        self.setStyleSheet("background-color: #2C2C2C; color: white")
         layout = QVBoxLayout()
 
         self.joystick = Joystick()
@@ -122,22 +127,22 @@ class MyApp(QWidget):
 
         # Create the buttons
         buttonLayout = QHBoxLayout()
-        self.buttonA = QPushButton("Button A")
+        self.buttonA = QPushButton("Read Name")
         self.buttonA.clicked.connect(self.send_A)
         self.buttonA.setEnabled(False)
-        self.buttonA.setStyleSheet("background-color: #5A5A5A;")
+        self.buttonA.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonA)
 
-        self.buttonB = QPushButton("Button B")
+        self.buttonB = QPushButton("Read Age")
         self.buttonB.clicked.connect(self.send_B)
         self.buttonB.setEnabled(False)
-        self.buttonB.setStyleSheet("background-color: #5A5A5A;")
+        self.buttonB.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonB)
 
-        self.buttonC = QPushButton("Button C")
+        self.buttonC = QPushButton("Read Polarity")
         self.buttonC.clicked.connect(self.send_C)
         self.buttonC.setEnabled(False)
-        self.buttonC.setStyleSheet("background-color: #5A5A5A;")
+        self.buttonC.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonC)
 
         layout.addLayout(buttonLayout)
@@ -169,7 +174,7 @@ class MyApp(QWidget):
 
         self.connectButton = QPushButton("Connect")
         self.connectButton.clicked.connect(self.connectSocket)
-        self.connectButton.setStyleSheet("background-color: #5A5A5A;")
+        self.connectButton.setStyleSheet("background-color: #242424; color: white")
         layout.addWidget(self.connectButton)
 
         self.setLayout(layout)
@@ -212,7 +217,7 @@ class MyApp(QWidget):
     def receive_response(self, textbox):
         try:
             data, addr = self.sock.recvfrom(1024) # buffer size is 1024 bytes
-            textbox.setText(str(data))
+            textbox.setText(data.decode("utf-8"))  # Here, we decode the bytes to a string.
         except socket.timeout:
             print('No response')
         finally:
@@ -224,6 +229,6 @@ class MyApp(QWidget):
 if __name__ == '__main__':
     app = QApplication([])
     mw = MyApp()
-    mw.setWindowTitle('Joystick and Buttons example')
+    mw.setWindowTitle('Vortron App')
     mw.show()
     sys.exit(app.exec_())

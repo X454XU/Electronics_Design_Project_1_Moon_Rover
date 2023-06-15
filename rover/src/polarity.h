@@ -1,29 +1,14 @@
-// Contains functions required to measure polarity of alien's magnetic field
+String readPolarity(Adafruit_LSM9DS1 lsm){
+  // Get new sensor events
+  lsm.read();
+  float z = lsm.magData.z;
 
-// Hall effect sensor pin
-const int hallSensorPin = 2;
-
-void setup() {
-  // Set the hall sensor pin as input
-  pinMode(hallSensorPin, INPUT);
-  
-  // Start serial communication
-  Serial.begin(9600);
-}
-
-void loop() {
-  // Read the state of the hall sensor pin
-  int hallSensorState = digitalRead(hallSensorPin);
-
-  // Check the polarity based on the sensor state
-  if (hallSensorState == HIGH) {
-    // Polarity is positive
-    Serial.println("Positive polarity");
+  // Determine the magnet's polarity
+  if (z > 0) {
+    return "North Up";
+  } else if (z < 0) {
+    return "South Up";
   } else {
-    // Polarity is negative
-    Serial.println("Negative polarity");
+    return "Neutral";
   }
-
-  // Delay for a certain duration
-  delay(500);
 }

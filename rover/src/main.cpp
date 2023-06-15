@@ -3,8 +3,14 @@
 #include <WiFi101.h>
 #include <WiFiUdp.h>
 #include <stdint.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_LSM9DS1.h>
 
 #include "secrets.h"
+#include "name.h"
+#include "age.h"
+#include "polarity.h"
 #include "movement.h"
 
 int status = WL_IDLE_STATUS;
@@ -22,6 +28,9 @@ char motorBuffer[6]; // buffer to hold motor commands
 String reply; // string to send back
 
 WiFiUDP Udp;
+
+// Create an instance of the LSM9DS1 sensor
+Adafruit_LSM9DS1 lsm = Adafruit_LSM9DS1();
 
 void printWiFiStatus() {
   // Print the SSID of the network you're attached to:
@@ -69,6 +78,15 @@ void setup() {
 
   motorSetup();
 
+  // Initialize the sensor
+  if (!lsm.begin()) {
+    Serial.println("Failed to initialize the LSM9DS1 sensor. Please check your wiring.");
+    while (1);
+  }
+
+  // Set magnetometer data rate
+  lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
+
   Udp.begin(localPort);
   Serial.println("Now listening...");
 }
@@ -105,7 +123,7 @@ void loop() {
       
       // Read alien's age:
       case 'B':
-        reply = "AGE";
+        reply = String(readAge());
         reply.toCharArray(replyBuffer, 16);
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
@@ -115,7 +133,7 @@ void loop() {
 
       // Measure polarity of alien's magnetic field:
       case 'C':
-        reply = "POLARITY";
+        reply = readPolarity(lsm);
         reply.toCharArray(replyBuffer, 16);
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
