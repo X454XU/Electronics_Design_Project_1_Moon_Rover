@@ -58,9 +58,9 @@ uint16_t Timercount_Handler() {
     if(TC->INTFLAG.bit.MC0 == 1){
       TC->INTFLAG.bit.MC0 = 1;
       uint16_t analogValue = analogRead(RADIO_RECEIVER_PIN);
-      uint16_t ZERO = 0;
+      uint16_t THRESHOLD = 10;
     // Determine whether to return '0' or '1' based on the current analog value
-      if (analogValue > ZERO) {
+      if (analogValue > THRESHOLD) {
           return 1;
     } else {
         return 0;
