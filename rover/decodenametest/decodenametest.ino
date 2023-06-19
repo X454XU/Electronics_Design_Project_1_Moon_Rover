@@ -53,82 +53,90 @@ void startTimer(int frequencyHz) {
 }
 
 uint16_t Timercount_Handler() {
-  TcCount16* TC = (TcCount16*) TC3;
-  // If this interrupt is due to the compare register matching the timer count
-  // we toggle the LED.
-  if (TC->INTFLAG.bit.MC0 == 1) {
-    TC->INTFLAG.bit.MC0 = 1;
-    // Write callback here!!!
-    return analogRead(RADIO_RECEIVER_PIN);
-  }
-  return 0;
+    TcCount16* TC = (TcCount16*) TC3;
+    // Read sensor value
+    if(TC->INTFLAG.bit.MC0 == 1){
+      TC->INTFLAG.bit.MC0 = 1;
+      uint16_t analogValue = analogRead(RADIO_RECEIVER_PIN);
+      uint16_t THRESHOLD = 10;
+    // Determine whether to return '0' or '1' based on the current analog value
+      if (analogValue > THRESHOLD) {
+          return 1;
+    } else {
+        return 0;
+    }
+    }
+    return 0;
+    
 }
 
 
 std::string decodeName() {
-  const uint32_t signal_frequency = 100000; // [Hz]
-  const uint32_t sampling_frequency = 200000; // [Hz]
+    const uint32_t signal_frequency = 100000; // [Hz]
+    const uint32_t sampling_frequency = 200000; // [Hz]
 
-  // Sample incoming signal
-  pinMode(RADIO_RECEIVER_PIN, INPUT);
+    // Sample incoming signal
+    pinMode(RADIO_RECEIVER_PIN, INPUT);
+    startTimer(sampling_frequency);
 
-  startTimer(sampling_frequency);
+  
+    bool isStartBitDetected = false;
+    std::string binaryValue;
 
-  std::string fullName;  // Variable to store the full name
-  std::string previousName;  // Variable to store the previous name
+    int repetitionCount = 0;
+    std::string lastRepetition;
 
-  bool isStartBitDetected = false;
-  std::string binaryValue;
+    while (true) {
+        uint16_t analogValue = Timercount_Handler();
 
-  while (true) {
-    uint16_t analogValue = Timercount_Handler();
+        // Detect start bit (0)
+        if (isStartBitDetected == false) {
+            if (analogValue == 0) {
+                isStartBitDetected = true;
+                binaryValue.clear();
+            }
+            continue;
+        }
 
-    // Detect start bit (0)
-    if (!isStartBitDetected) {
-      if (analogValue == 0) {
-        isStartBitDetected = true;
-        binaryValue.clear();
-      }
-      continue;
+        // Collect 10-bit binary/ASCII value
+        binaryValue += std::to_string(analogValue);
+
+        // Check if full 10 bits have been received
+        if (binaryValue.length() >= 10) {
+            // Remove start bit (first bit) and stop bit (last bit)
+            binaryValue = binaryValue.substr(1, 10 - 2);
+
+            // Convert binary/ASCII value to alphabet character
+            int decimalValue = std::stoi(binaryValue, nullptr, 2);
+            if (decimalValue >= 2 && decimalValue <= 27) {
+                char alphabetChar = 'A' + decimalValue - 2;
+                fullName += alphabetChar;
+            }
+
+            // Reset for the next binary value
+            isStartBitDetected = false;
+        }
+
+        // Detect stop bit (1)
+        if (analogValue == 1 && !isStartBitDetected) {
+            if (fullName == lastRepetition) {
+                repetitionCount++;
+                if (repetitionCount == 2) {
+                    Serial.println("Name: ");
+                    Serial.println(fullName.c_str());
+                    fullName.clear();
+                    repetitionCount = 0;
+                    lastRepetition.clear();
+                }
+            } else {
+                lastRepetition = fullName;
+            }
+        }
     }
 
-    // Collect 10-bit binary/ASCII value
-    binaryValue += std::to_string(analogValue);
-
-    // Check if full 10 bits have been received
-    if (binaryValue.length() >= 10) {
-      // Remove start bit (first bit) and stop bit (last bit)
-      binaryValue = binaryValue.substr(1, 10 - 2);
-
-      // Convert binary/ASCII value to alphabet character
-      int decimalValue = std::stoi(binaryValue, nullptr, 2);
-      if (decimalValue >= 2 && decimalValue <= 27) {
-        char alphabetChar = 'A' + decimalValue - 2;
-        fullName += alphabetChar;
-      }
-
-      // Reset for the next binary value
-      isStartBitDetected = false;
-    }
-
-    // Detect stop bit (1)
-    if (analogValue == 1 && !isStartBitDetected) {
-      // Check if the full name has been repeated
-      size_t repetitionPos = fullName.find(previousName, 0);
-      if (repetitionPos != std::string::npos && previousName != fullName) {
-        std::string correctedFullName = fullName;  // Get the correct full name
-        // Perform the necessary actions with the corrected full name
-        // ...
-        return correctedFullName;
-      }
-      // Clear the binary value for the next iteration
-      binaryValue.clear();
-      continue; // Go back to the start of the while loop
-    }
-  }
-
-  return fullName;
+    return fullName;
 }
+
 
 
 
