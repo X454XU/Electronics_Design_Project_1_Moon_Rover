@@ -104,11 +104,11 @@ void controlMotors(char motorBuffer[6]){
 
 void motorSetup() {
   // Set the motor control pins as outputs
-  const int motor1EN = 5;
-  const int motor2EN = 6;
+  const int motor1EN = 0;
+  const int motor2EN = 1;
 
-  const int motor1DIR = 9;
-  const int motor2DIR = 10;
+  const int motor1DIR = 2;
+  const int motor2DIR = 3;
   pinMode(motor1EN, OUTPUT);
   pinMode(motor2EN, OUTPUT);
 
