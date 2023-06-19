@@ -53,7 +53,7 @@ class Joystick(QWidget):
         x = max(0, min(x, 999))
         y = max(0, min(y, 999))
 
-        message = "D{:03d}{:03d}".format(x, y)
+        message = "E{:03d}{:03d}".format(x, y)
         self.sock.sendto(bytes(message, "utf-8"), (self.UDP_IP, self.UDP_PORT))
 
     def paintEvent(self, event):
@@ -106,7 +106,7 @@ class Joystick(QWidget):
 
         # Send a final packet with coordinates 500,500 when the joystick is released
         if self.sock is not None:
-            message = "D500500"
+            message = "E500500"
             self.sock.sendto(bytes(message, "utf-8"), (self.UDP_IP, self.UDP_PORT))
 
     def mouseMoveEvent(self, event):
@@ -139,11 +139,17 @@ class MyApp(QWidget):
         self.buttonB.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonB)
 
-        self.buttonC = QPushButton("Read Polarity")
+        self.buttonC = QPushButton("Calibrate Magnetometer")
         self.buttonC.clicked.connect(self.send_C)
         self.buttonC.setEnabled(False)
         self.buttonC.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonC)
+
+        self.buttonD = QPushButton("Read Polarity")
+        self.buttonD.clicked.connect(self.send_D)
+        self.buttonD.setEnabled(False)
+        self.buttonD.setStyleSheet("background-color: #242424; color: white")
+        buttonLayout.addWidget(self.buttonD)
 
         layout.addLayout(buttonLayout)
 
@@ -160,6 +166,10 @@ class MyApp(QWidget):
         self.responseC = QLineEdit()
         self.responseC.setEnabled(False)
         responseLayout.addWidget(self.responseC)
+
+        self.responseD = QLineEdit()
+        self.responseD.setEnabled(False)
+        responseLayout.addWidget(self.responseD)
 
         layout.addLayout(responseLayout)
 
@@ -213,6 +223,14 @@ class MyApp(QWidget):
         self.buttonC.setEnabled(False)
         self.joystick.sock = None
         threading.Thread(target=self.receive_response, args=(self.responseC,)).start()
+
+    def send_D(self):
+        self.sock.sendto(bytes("D", "utf-8"), (self.UDP_IP, self.UDP_PORT))
+        self.buttonA.setEnabled(False)
+        self.buttonB.setEnabled(False)
+        self.buttonC.setEnabled(False)
+        self.joystick.sock = None
+        threading.Thread(target=self.receive_response, args=(self.responseD,)).start()
 
     def receive_response(self, textbox):
         try:
