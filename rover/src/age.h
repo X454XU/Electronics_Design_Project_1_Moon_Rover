@@ -4,6 +4,7 @@
 
 uint32_t detectPulse(uint16_t avg_voltage){
     uint32_t time;
+    uint16_t start_time = millis();
 
     uint16_t current_voltage, previous_voltage;
 
@@ -12,7 +13,7 @@ uint32_t detectPulse(uint16_t avg_voltage){
     do{
         previous_voltage = current_voltage;
         current_voltage = analogRead(IR_RECEIVER_PIN);
-    } while(!(current_voltage > avg_voltage && previous_voltage <= avg_voltage));
+    } while((!(current_voltage > avg_voltage && previous_voltage <= avg_voltage)) || millis() - start_time < 4000);
 
     time = micros();
 

@@ -1,14 +1,9 @@
-String readPolarity(Adafruit_LSM9DS1 lsm){
-  // Get new sensor events
-  lsm.read();
-  float z = lsm.magData.z;
-
-  // Determine the magnet's polarity
-  if (z > 0) {
-    return "North Up";
-  } else if (z < 0) {
-    return "South Up";
-  } else {
-    return "Neutral";
-  }
+float calibrateReference(Adafruit_FXOS8700 accelmag){
+  /* Get a new sensor event */
+  //sensors_event_t aevent, mevent;
+  accelmag.getEvent(&aevent, &mevent);
+  float y_ref = mevent.magnetic.y;
+  Serial.print("y_ref: ");
+  Serial.println(y_ref);
+  return y_ref;
 }

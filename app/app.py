@@ -53,7 +53,7 @@ class Joystick(QWidget):
         x = max(0, min(x, 999))
         y = max(0, min(y, 999))
 
-        message = "E{:03d}{:03d}".format(x, y)
+        message = "A{:03d}{:03d}".format(x, y)
         self.sock.sendto(bytes(message, "utf-8"), (self.UDP_IP, self.UDP_PORT))
 
     def paintEvent(self, event):
@@ -106,7 +106,7 @@ class Joystick(QWidget):
 
         # Send a final packet with coordinates 500,500 when the joystick is released
         if self.sock is not None:
-            message = "E500500"
+            message = "A500500"
             self.sock.sendto(bytes(message, "utf-8"), (self.UDP_IP, self.UDP_PORT))
 
     def mouseMoveEvent(self, event):
@@ -127,38 +127,40 @@ class MyApp(QWidget):
 
         # Create the buttons
         buttonLayout = QHBoxLayout()
-        self.buttonA = QPushButton("Read Name")
-        self.buttonA.clicked.connect(self.send_A)
-        self.buttonA.setEnabled(False)
-        self.buttonA.setStyleSheet("background-color: #242424; color: white")
-        buttonLayout.addWidget(self.buttonA)
-
-        self.buttonB = QPushButton("Read Age")
+        self.buttonB = QPushButton("Read Name")
         self.buttonB.clicked.connect(self.send_B)
         self.buttonB.setEnabled(False)
         self.buttonB.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonB)
 
-        self.buttonC = QPushButton("Calibrate Magnetometer")
+        self.buttonC = QPushButton("Read Age")
         self.buttonC.clicked.connect(self.send_C)
         self.buttonC.setEnabled(False)
         self.buttonC.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonC)
 
-        self.buttonD = QPushButton("Read Polarity")
+        self.buttonD = QPushButton("Calibrate Magnetometer")
         self.buttonD.clicked.connect(self.send_D)
         self.buttonD.setEnabled(False)
         self.buttonD.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonD)
 
+        self.buttonE = QPushButton("Read Polarity")
+        self.buttonE.clicked.connect(self.send_E)
+        self.buttonE.setEnabled(False)
+        self.buttonE.setStyleSheet("background-color: #242424; color: white")
+        buttonLayout.addWidget(self.buttonE)
+
+        self.buttonSTOP = QPushButton("STOP")
+        self.buttonSTOP.clicked.connect(self.send_STOP)
+        self.buttonSTOP.setEnabled(False)
+        self.buttonSTOP.setStyleSheet("background-color: #242424; color: white")
+        buttonLayout.addWidget(self.buttonSTOP)
+
         layout.addLayout(buttonLayout)
 
         # Create the response text fields
         responseLayout = QHBoxLayout()
-        self.responseA = QLineEdit()
-        self.responseA.setEnabled(False)
-        responseLayout.addWidget(self.responseA)
-
         self.responseB = QLineEdit()
         self.responseB.setEnabled(False)
         responseLayout.addWidget(self.responseB)
@@ -170,6 +172,10 @@ class MyApp(QWidget):
         self.responseD = QLineEdit()
         self.responseD.setEnabled(False)
         responseLayout.addWidget(self.responseD)
+
+        self.responseE = QLineEdit()
+        self.responseE.setEnabled(False)
+        responseLayout.addWidget(self.responseE)
 
         layout.addLayout(responseLayout)
 
@@ -196,41 +202,49 @@ class MyApp(QWidget):
                                   socket.SOCK_DGRAM) # UDP
         self.sock.settimeout(5) # Set timeout for the socket
         self.joystick.setSocket(self.sock, self.UDP_IP, self.UDP_PORT)
-        self.buttonA.setEnabled(True)
         self.buttonB.setEnabled(True)
         self.buttonC.setEnabled(True)
-
-    def send_A(self):
-        self.sock.sendto(bytes("A", "utf-8"), (self.UDP_IP, self.UDP_PORT))
-        self.buttonA.setEnabled(False)
-        self.buttonB.setEnabled(False)
-        self.buttonC.setEnabled(False)
-        self.joystick.sock = None
-        threading.Thread(target=self.receive_response, args=(self.responseA,)).start()
+        self.buttonD.setEnabled(True)
+        self.buttonE.setEnabled(True)
 
     def send_B(self):
         self.sock.sendto(bytes("B", "utf-8"), (self.UDP_IP, self.UDP_PORT))
-        self.buttonA.setEnabled(False)
         self.buttonB.setEnabled(False)
         self.buttonC.setEnabled(False)
+        self.buttonD.setEnabled(False)
+        self.buttonE.setEnabled(False)
         self.joystick.sock = None
         threading.Thread(target=self.receive_response, args=(self.responseB,)).start()
 
     def send_C(self):
         self.sock.sendto(bytes("C", "utf-8"), (self.UDP_IP, self.UDP_PORT))
-        self.buttonA.setEnabled(False)
         self.buttonB.setEnabled(False)
         self.buttonC.setEnabled(False)
+        self.buttonD.setEnabled(False)
+        self.buttonE.setEnabled(False)
         self.joystick.sock = None
         threading.Thread(target=self.receive_response, args=(self.responseC,)).start()
 
     def send_D(self):
         self.sock.sendto(bytes("D", "utf-8"), (self.UDP_IP, self.UDP_PORT))
-        self.buttonA.setEnabled(False)
         self.buttonB.setEnabled(False)
         self.buttonC.setEnabled(False)
+        self.buttonD.setEnabled(False)
+        self.buttonE.setEnabled(False)
         self.joystick.sock = None
         threading.Thread(target=self.receive_response, args=(self.responseD,)).start()
+
+    def send_E(self):
+        self.sock.sendto(bytes("E", "utf-8"), (self.UDP_IP, self.UDP_PORT))
+        self.buttonB.setEnabled(False)
+        self.buttonC.setEnabled(False)
+        self.buttonD.setEnabled(False)
+        self.buttonE.setEnabled(False)
+        self.joystick.sock = None
+        threading.Thread(target=self.receive_response, args=(self.responseE,)).start()
+
+    def send_STOP(self):
+        self.sock.sendto(bytes("E500500"), (self.UDP_IP, self.UDP_PORT))
 
     def receive_response(self, textbox):
         try:
@@ -239,9 +253,10 @@ class MyApp(QWidget):
         except socket.timeout:
             print('No response')
         finally:
-            self.buttonA.setEnabled(True)
             self.buttonB.setEnabled(True)
             self.buttonC.setEnabled(True)
+            self.buttonD.setEnabled(True)
+            self.buttonE.setEnabled(True)
             self.joystick.sock = self.sock
 
 if __name__ == '__main__':

@@ -1,10 +1,18 @@
+#define motor1EN 2
+#define motor1DIR 3
+#define motor2EN 4
+#define motor2DIR 5
+
+void motorSetup() {
+  // Set the motor control pins as outputs
+  pinMode(motor1EN, OUTPUT);
+  pinMode(motor2EN, OUTPUT);
+
+  pinMode(motor1DIR, OUTPUT);
+  pinMode(motor2DIR, OUTPUT);
+}
+
 void controlMotors(char motorBuffer[6]){
-    const int motor1EN = 0;
-    const int motor2EN = 1;
-
-    const int motor1DIR = 2;
-    const int motor2DIR = 3;
-
     digitalWrite(motor1EN, HIGH);
     digitalWrite(motor2EN, HIGH);
 
@@ -40,7 +48,7 @@ void controlMotors(char motorBuffer[6]){
       turning -= 500;
       // everything is in 0-499 range
 
-      motor1Speed += 500 - turning/3;
+      motor1Speed += 500 + turning;
       motor2Speed += 500 - turning;
     }
     else if(xpos < 500 && ypos > 500){
@@ -52,7 +60,7 @@ void controlMotors(char motorBuffer[6]){
       turning = 500 - turning; 
 
       motor1Speed += 500 - turning;
-      motor2Speed += 500 - turning/3; 
+      motor2Speed += 500 + turning; 
     }
     else if(xpos > 500 && ypos < 500){
       digitalWrite(motor1DIR, LOW);
@@ -62,7 +70,7 @@ void controlMotors(char motorBuffer[6]){
       motor2Speed = 500 - motor2Speed; 
       turning -= 500;
 
-      motor1Speed += 500 - turning/3;
+      motor1Speed += 500 + turning;
       motor2Speed += 500 - turning; 
     }
 
@@ -76,7 +84,7 @@ void controlMotors(char motorBuffer[6]){
       turning = 500 - turning;
 
       motor1Speed += 500 - turning;
-      motor2Speed += 500 - turning/3; 
+      motor2Speed += 500 + turning; 
     }
     else{
       motor1Speed = 0;
@@ -100,18 +108,4 @@ void controlMotors(char motorBuffer[6]){
     // Set the motor speeds
     analogWrite(motor1EN, abs(motor1Speed));
     analogWrite(motor2EN, abs(motor2Speed));
-}
-
-void motorSetup() {
-  // Set the motor control pins as outputs
-  const int motor1EN = 5;
-  const int motor2EN = 6;
-
-  const int motor1DIR = 9;
-  const int motor2DIR = 10;
-  pinMode(motor1EN, OUTPUT);
-  pinMode(motor2EN, OUTPUT);
-
-  pinMode(motor1DIR, OUTPUT);
-  pinMode(motor2DIR, OUTPUT);
 }
