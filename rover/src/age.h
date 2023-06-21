@@ -2,6 +2,7 @@
 
 // Contains functions required to read alien's age
 
+// Detects a single pulse and returns the time at which it was detected
 uint32_t detectPulse(uint16_t avg_voltage){
     uint32_t time;
     uint16_t start_time = millis();
@@ -13,13 +14,15 @@ uint32_t detectPulse(uint16_t avg_voltage){
     do{
         previous_voltage = current_voltage;
         current_voltage = analogRead(IR_RECEIVER_PIN);
-    } while((!(current_voltage > avg_voltage && previous_voltage <= avg_voltage)) || millis() - start_time < 4000);
+    } while((!(current_voltage > avg_voltage && previous_voltage <= avg_voltage)) && millis() - start_time < 4000);
 
     time = micros();
+    Serial.println(time);
 
     return time;
 }
 
+// Calculates the age of the alien in years after reading a given number of pulses
 uint16_t readAge(){
     const uint16_t calibration_time = 2000; // [ms]
     const uint16_t pulses = 2000; // number of pulses to be recorded 
@@ -48,7 +51,7 @@ uint16_t readAge(){
     for(int i = 0; i < pulses; i++) end_time = detectPulse(avg_voltage);
 
     // Calculate age
-    age = round((end_time - start_time) / pulses / 10);
+    age = round(round((end_time - start_time) / pulses / 10) / 10) * 10;
 
     return age;
 }

@@ -7,16 +7,14 @@
 #include <Adafruit_FXOS8700.h>
 
 #include "secrets.h"
-//#include "name.h"
 #include "age.h"
-//#include "polarity.h"
 #include "movement.h"
 
 int status = WL_IDLE_STATUS;
 
-char ssid[] = SECRET_SSID; // your network SSID (name)
-char pass[] = SECRET_PASS; // your network password (use for WPA, or use as key for WEP)
-int keyIndex = 0; // your network key Index number (needed only for WEP)
+char ssid[] = SECRET_SSID; // network SSID
+char pass[] = SECRET_PASS; // network password
+int keyIndex = 0; // network key Index number
 
 unsigned int localPort = 2390; // local port to listen on
 
@@ -29,7 +27,6 @@ String reply; // string to send back
 
 WiFiUDP Udp;
 
-/* Assign a unique ID to this sensor at the same time */
 Adafruit_FXOS8700 accelmag = Adafruit_FXOS8700(0x8700A, 0x8700B);
 
 sensors_event_t aevent, mevent;
@@ -55,9 +52,11 @@ void printWiFiStatus() {
 void setup() {
   // Initialize serial and wait for port to open:
   Serial.begin(9600);
-  while (!Serial) {
+  /*while (!Serial) {
     ; // Wait for serial port to connect. Needed for native USB port only.
-  }
+  }*/
+
+  Serial1.begin(600); // set up Serial1 to read alien's name
 
   // Check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -83,10 +82,7 @@ void setup() {
 
   /* Initialise the sensor */
   if (!accelmag.begin()) {
-    /* There was a problem detecting the FXOS8700 ... check your connections */
     Serial.println("Ooops, no FXOS8700 detected ... Check your wiring!");
-    while (1)
-      ;
   }
 
   Udp.begin(localPort);
@@ -130,9 +126,9 @@ void loop() {
         Serial.print(motorBuffer[4]);
         Serial.println(motorBuffer[5]);
         break;
+
       // Decode alien's name:
       case 'B':
-        Serial1.begin(600);
         Serial1.readBytes(InChar,10);
         reply = "";
         reply.toCharArray(replyBuffer, 16);
@@ -146,6 +142,7 @@ void loop() {
         replyBuffer[7] = char(InChar[7]);
         replyBuffer[8] = char(InChar[8]);
         replyBuffer[9] = char(InChar[9]);
+        Serial.println(replyBuffer);
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
         Udp.endPacket();
@@ -154,7 +151,8 @@ void loop() {
       
       // Read alien's age:
       case 'C':
-        reply = String(readAge());
+        delay(4000);
+        reply = String(readAge()) + " years";
         reply.toCharArray(replyBuffer, 16);
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
@@ -176,6 +174,7 @@ void loop() {
         Udp.endPacket();
         Serial.println("Sent reference value");
         break;
+
       // Measure polarity of alien's magnetic field:
       case 'E':
         for(int i=0; i<100; i++){

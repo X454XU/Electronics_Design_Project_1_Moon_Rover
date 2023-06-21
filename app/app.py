@@ -7,12 +7,14 @@ from enum import Enum
 import socket
 import threading
 
+# This enum is used to determine the direction of the joystick
 class Direction(Enum):
     Left = 0
     Right = 1
     Up = 2
     Down = 3
 
+# This class is based on the code from https://stackoverflow.com/questions/50569489/how-to-make-a-joystick-in-pyqt
 class Joystick(QWidget):
     def __init__(self, parent=None):
         super(Joystick, self).__init__(parent)
@@ -23,6 +25,7 @@ class Joystick(QWidget):
         self.sock = None
         self.setStyleSheet("background-color: #242424;")
 
+    # This function is called when the socket is set
     def setSocket(self, sock, UDP_IP, UDP_PORT):
         self.sock = sock
         self.UDP_IP = UDP_IP
@@ -31,6 +34,7 @@ class Joystick(QWidget):
         self.timer.timeout.connect(self.send_joystick_position)
         self.timer.start(100)
 
+    # This function is called every 100ms to send the joystick position to the server
     def send_joystick_position(self):
         if self.sock is None or not self.grabCenter:
             return
@@ -56,6 +60,7 @@ class Joystick(QWidget):
         message = "A{:03d}{:03d}".format(x, y)
         self.sock.sendto(bytes(message, "utf-8"), (self.UDP_IP, self.UDP_PORT))
 
+    # This function is called when the joystick is moved
     def paintEvent(self, event):
         painter = QPainter(self)
         bounds = QRectF(-self.__maxDistance, -self.__maxDistance, self.__maxDistance * 2, self.__maxDistance * 2).translated(self._center())
@@ -94,11 +99,13 @@ class Joystick(QWidget):
             return (Direction.Down, distance)
         return (Direction.Right, distance)
 
+    # These functions are called when the mouse is pressed, released, or moved
     def mousePressEvent(self, ev):
         if self.sock is None:
             return
         self.grabCenter = self._centerEllipse().contains(ev.pos())
 
+    # This function is called when the mouse is released
     def mouseReleaseEvent(self, event):
         self.grabCenter = False
         self.movingOffset = QPointF(0, 0)
@@ -151,12 +158,6 @@ class MyApp(QWidget):
         self.buttonE.setStyleSheet("background-color: #242424; color: white")
         buttonLayout.addWidget(self.buttonE)
 
-        self.buttonSTOP = QPushButton("STOP")
-        self.buttonSTOP.clicked.connect(self.send_STOP)
-        self.buttonSTOP.setEnabled(False)
-        self.buttonSTOP.setStyleSheet("background-color: #242424; color: white")
-        buttonLayout.addWidget(self.buttonSTOP)
-
         layout.addLayout(buttonLayout)
 
         # Create the response text fields
@@ -195,6 +196,7 @@ class MyApp(QWidget):
 
         self.setLayout(layout)
 
+    # This function is called when the connect button is pressed
     def connectSocket(self):
         self.UDP_IP = self.ipInput.text()
         self.UDP_PORT = int(self.portInput.text())
@@ -207,6 +209,7 @@ class MyApp(QWidget):
         self.buttonD.setEnabled(True)
         self.buttonE.setEnabled(True)
 
+    # These functions are called when the buttons are pressed
     def send_B(self):
         self.sock.sendto(bytes("B", "utf-8"), (self.UDP_IP, self.UDP_PORT))
         self.buttonB.setEnabled(False)
@@ -243,9 +246,7 @@ class MyApp(QWidget):
         self.joystick.sock = None
         threading.Thread(target=self.receive_response, args=(self.responseE,)).start()
 
-    def send_STOP(self):
-        self.sock.sendto(bytes("E500500"), (self.UDP_IP, self.UDP_PORT))
-
+    # This function is called when the response is received
     def receive_response(self, textbox):
         try:
             data, addr = self.sock.recvfrom(1024) # buffer size is 1024 bytes

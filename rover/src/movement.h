@@ -1,7 +1,7 @@
 #define motor1EN 2
 #define motor1DIR 3
-#define motor2EN 4
-#define motor2DIR 5
+#define motor2EN 8
+#define motor2DIR 6
 
 void motorSetup() {
   // Set the motor control pins as outputs
@@ -16,6 +16,7 @@ void controlMotors(char motorBuffer[6]){
     digitalWrite(motor1EN, HIGH);
     digitalWrite(motor2EN, HIGH);
 
+    // Convert char array to int
     int y1 = (int)motorBuffer[0] - 48; 
     int y2 = (int)motorBuffer[1] - 48;
     int y3 = (int)motorBuffer[2] - 48;
@@ -68,7 +69,7 @@ void controlMotors(char motorBuffer[6]){
 
       motor1Speed = 500 - motor1Speed;
       motor2Speed = 500 - motor2Speed; 
-      turning -= 500;
+      turning -= 500;  
 
       motor1Speed += 500 + turning;
       motor2Speed += 500 - turning; 
